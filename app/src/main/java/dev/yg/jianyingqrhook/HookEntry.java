@@ -50,6 +50,7 @@ public final class HookEntry implements IXposedHookLoadPackage {
     @Override public void handleLoadPackage(XC_LoadPackage.LoadPackageParam p) {
         if (!"com.lemon.lv".equals(p.packageName)) return;
         Log.i(TAG, "loaded process=" + p.processName + " pid=" + Process.myPid());
+        emitStatus(p.processName);
         XposedBridge.hookAllMethods(ClassLoader.class, "loadClass", new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
                 if (param.hasThrowable() || !(param.getResult() instanceof Class)
@@ -332,6 +333,25 @@ public final class HookEntry implements IXposedHookLoadPackage {
 
     private static void diagnostic(String operation, Throwable error) {
         Log.w(TAG, operation + ": " + error.getClass().getSimpleName());
+    }
+
+    private static void emitStatus(String processName) {
+        try {
+            long eventId = IDS.incrementAndGet();
+            JSONObject event = new JSONObject();
+            event.put("id", eventId);
+            event.put("pid", Process.myPid());
+            event.put("time_ms", System.currentTimeMillis());
+            event.put("phase", "hook-ready");
+            event.put("backend", "xposed-bridge");
+            event.put("process", processName == null ? JSONObject.NULL : processName);
+            String encoded = Base64.encodeToString(
+                    event.toString().getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+            Log.i(TAG, "JYQR1 " + Process.myPid() + " " + eventId
+                    + " 1/1 " + encoded);
+        } catch (Throwable error) {
+            diagnostic("status", error);
+        }
     }
 
     private interface Action { void run() throws Exception; }

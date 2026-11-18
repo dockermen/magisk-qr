@@ -18,6 +18,6 @@ cd D:\project\jianyinqQR\magisk-qr
 
 输出 `app\build\outputs\magisk\jianying-qr-magisk.zip`。模块按 Magisk 规范包含 `zygisk/arm64-v8a.so`，并将 APK 安装为带桌面图标的应用。缺少原生库时打包直接失败。
 
-打开桌面上的“剪映扫码请求 Hook”即可读取 `logcat` 中的 `JYQrHook` 和 `ZygiskJYQr` 数据。
+安装模块后，在 LSPosed 中启用“剪映扫码请求 Hook”并将 `com.lemon.lv` 加入作用域；再打开桌面上的“剪映扫码请求 Hook”即可读取 `logcat` 中的 `JYQrHook` 和 `ZygiskJYQr` 数据。界面中的 `hook-ready` 表示 Java Hook 已加载，`java_backend=unavailable` 表示当前只有 Zygisk 注入而没有 Java Hook 后端。
 
-当前产物属于注入诊断版本：原生入口仅尝试为目标主进程输出状态日志，尚未真机验证。请求字段采集仍由原有 `HookEntry` 提供，纯 Zygisk 环境下还需要接入 Java 方法 Hook 后端；CI 构建成功不表示已经完成扫码采集。
+Zygisk 原生入口会为目标主进程检查 Java Hook 后端并输出状态；请求字段采集由现有 `HookEntry` 完成。CI 构建成功不表示已经完成扫码采集，仍需在目标设备验证 LSPosed 作用域、Root logcat 读取和扫码请求。

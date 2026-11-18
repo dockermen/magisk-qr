@@ -4,7 +4,9 @@
 
 ## 当前状态
 
-**当前为注入诊断版本，请求采集链路尚未完成。** 原生入口只尝试为 `com.lemon.lv` 主进程输出状态日志，尚未接入 Java 方法 Hook 后端。旧 `HookEntry` 依赖传统 Xposed API，作为待迁移代码保留。CI 成功表示构建和静态检查通过，仍需真机验证。
+Zygisk 入口现在会在 `com.lemon.lv` 专属进程中检查 Java Hook 后端并输出连接状态。Java 请求采集由现有 `HookEntry` 通过 Xposed API 执行，因此需要在同一设备启用 LSPosed/Xposed 模块并将 `com.lemon.lv` 加入作用域；纯 Zygisk 环境会明确显示 `java_backend=unavailable`，不会伪造采集成功状态。
+
+采集链路为：`HookEntry` -> `logcat` 的 `JYQR1` Base64 分片 -> Root 查看器 -> JSON 解码。查看器同时展示 `hook-ready` 状态事件和请求阶段事件。CI 成功表示构建与静态检查通过，仍需真机验证 LSPosed 作用域、Root logcat 读取和目标请求。
 
 ## GitHub Actions
 
@@ -27,7 +29,7 @@ $env:ANDROID_NDK_ROOT = 'C:\Android\Sdk\ndk\27.2.12479018'
 
 ## 源码
 
-- `app/`：桌面查看器与待迁移的 Java Hook。
+- `app/`：查看器与通过 Xposed API 加载的 Java Hook。
 - `native/`：Zygisk 原生入口、官方 API 头文件及 CMake 配置。
 - `magisk/`：模块元数据和安装脚本。
 - `tools/`：日志解码器及测试。

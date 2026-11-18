@@ -15,8 +15,12 @@ public:
             __android_log_print(ANDROID_LOG_INFO, "ZygiskJYQr", "injecting com.lemon.lv");
         }
     void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
-        if (isTarget(args))
-            __android_log_print(ANDROID_LOG_INFO, "ZygiskJYQr", "attached com.lemon.lv");
+        if (!isTarget(args)) return;
+        const bool xposedBridge = hasClass("de/robv/android/xposed/XposedBridge");
+        __android_log_print(ANDROID_LOG_INFO, "ZygiskJYQr",
+                "attached com.lemon.lv java_backend=%s capture=%s",
+                xposedBridge ? "xposed-bridge" : "unavailable",
+                xposedBridge ? "HookEntry" : "disabled");
     }
 private:
     bool isTarget(const zygisk::AppSpecializeArgs* args) const {
@@ -25,6 +29,15 @@ private:
         bool target = name && std::strcmp(name, "com.lemon.lv") == 0;
         if (name) g_env->ReleaseStringUTFChars(args->nice_name, name);
         return target;
+    }
+
+    bool hasClass(const char* name) const {
+        if (!g_env || !name) return false;
+        jclass type = g_env->FindClass(name);
+        if (g_env->ExceptionCheck()) g_env->ExceptionClear();
+        if (type == nullptr) return false;
+        g_env->DeleteLocalRef(type);
+        return true;
     }
     JNIEnv* g_env = nullptr;
 };
