@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(jianyingqrzygisk)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_library(jianyingqrzygisk SHARED zygisk.cpp)
+target_link_libraries(jianyingqrzygisk log)
+set_target_properties(jianyingqrzygisk PROPERTIES OUTPUT_NAME "jianyingqr")

@@ -1,0 +1,30 @@
+#include "zygisk.hpp"
+#include <android/log.h>
+#include <cstring>
+#include <string>
+
+namespace {
+zygisk::Api* g_api = nullptr;
+class Module final : public zygisk::ModuleBase {
+public:
+    void onLoad(zygisk::Api* api, JNIEnv* env) override { g_api = api; g_env = env; }
+    void preAppSpecialize(zygisk::AppSpecializeArgs* args) override {
+        if (!isTarget(args)) return;
+            __android_log_print(ANDROID_LOG_INFO, "ZygiskJYQr", "injecting com.lemon.lv");
+        }
+    void postAppSpecialize(const zygisk::AppSpecializeArgs* args) override {
+        if (isTarget(args))
+            __android_log_print(ANDROID_LOG_INFO, "ZygiskJYQr", "attached com.lemon.lv");
+    }
+private:
+    bool isTarget(const zygisk::AppSpecializeArgs* args) const {
+        if (!g_env || !args || !args->nice_name) return false;
+        const char* name = g_env->GetStringUTFChars(args->nice_name, nullptr);
+        bool target = name && std::strcmp(name, "com.lemon.lv") == 0;
+        if (name) g_env->ReleaseStringUTFChars(args->nice_name, name);
+        return target;
+    }
+    JNIEnv* g_env = nullptr;
+};
+}
+REGISTER_ZYGISK_MODULE(Module)

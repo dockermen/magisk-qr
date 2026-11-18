@@ -1,0 +1,6 @@
+id=jianyingqr
+name=剪映扫码请求记录 Magisk Zygisk
+version=1.0.0
+versionCode=1
+author=YG
+description=Zygisk 注入剪映并提供桌面日志查看器

@@ -1,0 +1,7 @@
+* text=auto
+gradlew text eol=lf
+*.sh text eol=lf
+module.prop text eol=lf
+update-binary text eol=lf
+updater-script text eol=lf
+*.bat text eol=crlf
