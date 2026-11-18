@@ -35,16 +35,26 @@ jobs:
         run: |
           python3 - <<'PY'
           import zipfile
-          with zipfile.ZipFile('app/build/outputs/magisk/jianying-qr-magisk.zip') as archive:
+          path = 'app/build/outputs/magisk/jianying-qr-magisk.zip'
+          with zipfile.ZipFile(path) as archive:
               assert archive.testzip() is None, 'ZIP CRC check failed'
+              names = set(archive.namelist())
+              assert 'module.prop' in names, 'module.prop is missing from module root'
+              assert 'zygisk/arm64-v8a.so' in names, 'Zygisk library is missing'
+              assert 'META-INF/com/google/android/update-binary' in names, 'Magisk installer is missing'
               assert archive.read('zygisk/arm64-v8a.so')[:4] == b'\x7fELF', 'Native library is missing or invalid'
               assert archive.read('system/app/JianyingQrViewer/JianyingQrViewer.apk')[:2] == b'PK'
+          print('Magisk module ZIP verified:', path)
           PY
-      - name: Upload module
+      - name: Upload Magisk module
         uses: actions/upload-artifact@v4
         with:
-          name: jianying-qr-magisk
+          name: jianying-qr-magisk-module
           if-no-files-found: error
-          path: |
-            app/build/outputs/magisk/jianying-qr-magisk.zip
-            app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/magisk/jianying-qr-magisk.zip
+      - name: Upload viewer APK separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: jianying-qr-viewer-apk
+          if-no-files-found: error
+          path: app/build/outputs/apk/debug/app-debug.apk
