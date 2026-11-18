@@ -1,3 +1,5 @@
+#include <sys/types.h>
+#include <cstdint>
 #include "zygisk.hpp"
 #include <android/log.h>
 #include <cstring>
